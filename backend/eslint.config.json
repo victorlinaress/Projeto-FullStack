@@ -1,0 +1,17 @@
+{
+  "env": {
+    "node": true,
+    "commonjs": true,
+    "es2021": true
+  },
+  "extends": "eslint:recommended",
+  "parserOptions": {
+    "ecmaVersion": 12
+  },
+  "rules": {
+    "indent": ["error", 2],                 // Indentação de 2 espaços
+    "linebreak-style": ["error", "unix"],    // Quebra de linha no estilo Unix
+    "quotes": ["error", "single"],           // Usar aspas duplas
+    "semi": ["error", "always"]              // Sempre usar ponto e vírgula
+  }
+}
