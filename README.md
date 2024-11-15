@@ -1,6 +1,10 @@
 Este projeto é uma aplicação Full Stack que permite aos usuários gerenciar suas tarefas diárias de forma eficaz. A arquitetura segue o modelo cliente-servidor, onde o backend é responsável por gerenciar as operações com o banco de dados, enquanto o frontend fornece uma interface interativa para o usuário.
 
 Backend: Node.js, Express
+
 Banco de Dados: MySQL (com container Docker)
+
 Frontend: HTML, CSS, JavaScript
+
 Containerização: Docker
+
