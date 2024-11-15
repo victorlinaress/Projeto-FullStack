@@ -1,10 +1,13 @@
-const tbody = document.querySelector("tbody");
-const addForm = document.querySelector(".add-form");
-const inputTask = document.querySelector(".input-task");
+const tbody = document.querySelector('tbody');
+const addForm = document.querySelector('.add-form');
+const inputTask = document.querySelector('.input-task');
 
 const fetchTasks = async () => {
-  const response = await fetch("http://localhost:3333/tasks");
-  const tasks = response.json();
+  const response = await fetch('http://localhost:3333/tasks');
+  const tasks = await response.json();
+
+  // Verifique as tarefas recebidas no console
+  console.log('Tarefas recebidas:', tasks);
 
   return tasks;
 };
@@ -14,38 +17,45 @@ const addTask = async (event) => {
 
   const task = { title: inputTask.value };
 
-  await fetch("http://localhost:3333/tasks", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+  await fetch('http://localhost:3333/tasks', {
+    method: 'post',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(task),
   });
+
+
   loadTasks();
   inputTask.value = '';
-};
+}
 
-const updateTask = async(id, title, created_at, status) => {
-  
-
-  await fetch(`http://localhost:3333/tasks/ ${id}`,
-    {
-      method: 'put',
-      "Content-Type": { 'application/json'},
-      body: {title, status}
-    }
-  );
+const deleteTask = async (id) => {
+  await fetch(`http://localhost:3333/tasks/${id}`, {
+    method: 'delete',
+  });
 
   loadTasks();
-
 }
+
+const updateTask = async ({ id, title, status }) => {
+
+  await fetch(`http://localhost:3333/tasks/${id}`, {
+    method: 'put',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ title, status }),
+  });
+
+  loadTasks();
+}
+
+
 
 const formatDate = (dateUTC) => {
-  const date = new Date (dateUTC).toLocaleDateString();
-
+  const options = { dateStyle: 'long', timeStyle: 'short' };
+  const date = new Date(dateUTC).toLocaleString('pt-br', options);
+  return date;
 }
 
-const createElement = (tag, innerText = "", innerHTML = "") => {
+const createElement = (tag, innerText = '', innerHTML = '') => {
   const element = document.createElement(tag);
 
   if (innerText) {
@@ -53,60 +63,52 @@ const createElement = (tag, innerText = "", innerHTML = "") => {
   }
 
   if (innerHTML) {
-    element.innerText = innerText;
+    element.innerHTML = innerHTML;
   }
-  return element;
-};
 
-const createSelect = () => {
+  return element;
+}
+
+const createSelect = (value) => {
   const options = `
-  <option value="pendente">pendente</option>
-  <option value="em andamento">em andamento</option>
-  <option value="concluída">concluída</option>
+    <option value="pendente">pendente</option>
+    <option value="em andamento">em andamento</option>
+    <option value="concluída">concluída</option>
   `;
-  const select = createElement("select", "", options);
+
+  const select = createElement('select', '', options);
+
   select.value = value;
+
   return select;
-};
+}
 
 const createRow = (task) => {
-  const { id, title, created_at, status } = task;
 
-  const tr = document.createElement("tr");
-  const tdTitle = createElement("td", title);
-  const tdCreatedAt = createElement("td", created_at);
-  const tdStatus = createElement("td");
-  const tdActions = createElement("td");
+  const { id, title, create_at, status } = task;
+
+  const tr = createElement('tr');
+  const tdTitle = createElement('td', title);
+  const tdCreatedAt = createElement('td', formatDate(create_at));
+  const tdStatus = createElement('td');
+  const tdActions = createElement('td');
 
   const select = createSelect(status);
 
-  select.addEventListener('change', ({target}) => updateTask(...task, status: target.value))
+  select.addEventListener('change', ({ target }) => updateTask({ ...task, status: target.value }));
 
-  const editButton = createElement(
-    "button",
-    "",
-    <span class="material-symbols-outlined">edit</span>
-  );
-  const deleteButton = createElement(
-    "button",
-    "",
-    <span class="material-symbols-outlined">delete</span>
-  );
-
+  const editButton = createElement('button', '', '<span class="material-symbols-outlined">edit</span>');
+  const deleteButton = createElement('button', '', '<span class="material-symbols-outlined">delete</span>');
+  
   const editForm = createElement('form');
   const editInput = createElement('input');
 
   editInput.value = title;
   editForm.appendChild(editInput);
-
-
-
+  
   editForm.addEventListener('submit', (event) => {
     event.preventDefault();
-    updateTask({ id, title: editInput.value, status });
-
     
-
     updateTask({ id, title: editInput.value, status });
   });
 
@@ -115,9 +117,11 @@ const createRow = (task) => {
     tdTitle.appendChild(editForm);
   });
 
-  editButton.classList.add("btn-action");
-  deleteButton.classList.add("btn-action");
+  editButton.classList.add('btn-action');
+  deleteButton.classList.add('btn-action');
 
+  deleteButton.addEventListener('click', () => deleteTask(id));
+  
   tdStatus.appendChild(select);
 
   tdActions.appendChild(editButton);
@@ -129,20 +133,20 @@ const createRow = (task) => {
   tr.appendChild(tdActions);
 
   return tr;
-};
+}
 
 const loadTasks = async () => {
   const tasks = await fetchTasks();
+
   tbody.innerHTML = '';
 
   tasks.forEach((task) => {
     const tr = createRow(task);
     tbody.appendChild(tr);
   });
+}
 
 
-};
-
-addForm.addEventListener("submit", addTask);
+addForm.addEventListener('submit', addTask);
 
 loadTasks();
